@@ -24,33 +24,59 @@ st.write(
 )
 
 # ------------------------------------------------
+# User Login Section
+# ------------------------------------------------
+
+st.sidebar.header("User Login")
+
+username = st.sidebar.text_input(
+    "Enter Username"
+)
+
+# Create separate file for each user
+
+FILE_NAME = f"{username}.csv"
+
+
+# ------------------------------------------------
 # File Handling
 # ------------------------------------------------
 
-FILE_NAME = "expenses.csv"
+if username != "":
 
-# Create CSV if not exists
+    # Create CSV file if not exists
 
-if not os.path.exists(FILE_NAME):
+    if not os.path.exists(FILE_NAME):
 
-    empty_df = pd.DataFrame(
-        columns=[
-            "Date",
-            "Category",
-            "Amount",
-            "Description"
-        ]
-    )
+        empty_df = pd.DataFrame(
+            columns=[
+                "Date",
+                "Category",
+                "Amount",
+                "Description"
+            ]
+        )
 
-    empty_df.to_csv(FILE_NAME, index=False)
+        empty_df.to_csv(FILE_NAME, index=False)
 
-# Load Existing Data
+    # Load Existing Data
 
-try:
+    try:
 
-    df = pd.read_csv(FILE_NAME)
+        df = pd.read_csv(FILE_NAME)
 
-except:
+    except:
+
+        df = pd.DataFrame(
+            columns=[
+                "Date",
+                "Category",
+                "Amount",
+                "Description"
+            ]
+        )
+
+else:
 
     df = pd.DataFrame(
         columns=[
@@ -61,11 +87,10 @@ except:
         ]
     )
 
+
 # ------------------------------------------------
 # Sidebar Inputs
 # ------------------------------------------------
-
-st.sidebar.header("Add Expense")
 
 expense_date = st.sidebar.date_input(
     "Date",
@@ -75,15 +100,16 @@ expense_date = st.sidebar.date_input(
 category = st.sidebar.selectbox(
     "Category",
     [
-        "Food",
-        "Transport",
-        "Shopping",
-        "Bills",
-        "Entertainment",
-        "Health",
-        "Education",
-        "Other"
-    ]
+    "Food",
+    "Transport",
+    "Shopping",
+    "Recharge & Bills",
+    "Rent/Hostel Fee",
+    "Entertainment",
+    "Health",
+    "Education",
+    "Other"
+]
 )
 
 amount = st.sidebar.number_input(
@@ -95,6 +121,8 @@ amount = st.sidebar.number_input(
 description = st.sidebar.text_input(
     "Description"
 )
+
+
 
 # ------------------------------------------------
 # Add Expense Button
@@ -123,6 +151,7 @@ if st.sidebar.button("Add Expense"):
     st.sidebar.success(
         "Expense Added Successfully"
     )
+    
 
 # ------------------------------------------------
 # Main Dashboard
@@ -134,7 +163,108 @@ st.dataframe(
     df,
     use_container_width=True
 )
+# ------------------------------------------------
+# Delete Expense Entry
+# ------------------------------------------------
 
+st.subheader("Delete Expense Entry")
+
+if not df.empty:
+
+    # Select row number
+    row_to_delete = st.number_input(
+        "Enter Row Number to Delete",
+        min_value=0,
+        max_value=len(df)-1,
+        step=1,
+        key="delete_row"
+    )
+
+    # Delete button
+    if st.button("Delete Entry"):
+
+        # Drop selected row
+        df = df.drop(row_to_delete)
+
+        # Reset index
+        df = df.reset_index(drop=True)
+
+        # Save updated data
+        df.to_csv(FILE_NAME, index=False)
+
+        st.success(
+            "Entry Deleted Successfully"
+        )
+
+        # Refresh app
+        st.rerun()
+        # ------------------------------------------------
+# Edit Expense Entry
+# ------------------------------------------------
+
+st.subheader("Edit Expense Entry")
+
+if not df.empty:
+
+    # Select row to edit
+    row_to_edit = st.number_input(
+        "Enter Row Number to Edit",
+        min_value=0,
+        max_value=len(df)-1,
+        step=1,
+        key="edit_row"
+    )
+
+    # Current row data
+    current_row = df.loc[row_to_edit]
+
+    # Editable inputs
+    new_category = st.selectbox(
+        "Edit Category",
+        [
+            "Food",
+            "Transport",
+            "Shopping",
+            "Bills",
+            "Entertainment",
+            "Health",
+            "Education",
+            "Other"
+        ],
+        key="edit_category"
+    )
+
+    new_amount = st.number_input(
+        "Edit Amount",
+        min_value=0.0,
+        value=float(current_row["Amount"]),
+        key="edit_amount"
+    )
+
+    new_description = st.text_input(
+        "Edit Description",
+        value=str(current_row["Description"]),
+        key="edit_description"
+    )
+
+    # Update button
+    if st.button("Update Entry"):
+
+        df.loc[row_to_edit, "Category"] = new_category
+
+        df.loc[row_to_edit, "Amount"] = new_amount
+
+        df.loc[row_to_edit, "Description"] = new_description
+
+        # Save updated CSV
+        df.to_csv(FILE_NAME, index=False)
+
+        st.success(
+            "Entry Updated Successfully"
+        )
+
+        # Refresh app
+        st.rerun()
 # ------------------------------------------------
 # Analytics
 # ------------------------------------------------
