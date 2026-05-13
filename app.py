@@ -221,16 +221,17 @@ if not df.empty:
     # Editable inputs
     new_category = st.selectbox(
         "Edit Category",
-        [
-            "Food",
-            "Transport",
-            "Shopping",
-            "Bills",
-            "Entertainment",
-            "Health",
-            "Education",
-            "Other"
-        ],
+[
+    "Food",
+    "Transport",
+    "Shopping",
+    "Recharge & Bills",
+    "Rent/Hostel Fee",
+    "Entertainment",
+    "Health",
+    "Education",
+    "Other"
+],
         key="edit_category"
     )
 
